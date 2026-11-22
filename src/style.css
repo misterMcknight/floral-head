@@ -60,3 +60,16 @@ footer{position:relative;flex-shrink:0;line-height:1.3}
    eliminate the empty upper band in the embedded reference thumbnails. */
 .sample{position:relative}
 .sample img{position:absolute;left:0;top:-48%;width:100%;height:148%;object-fit:cover;object-position:center top}
+
+/* Align both demo photographs at the TOP: show the head first and
+   crop only the lower part. Override the earlier upward offset. */
+.sample img,.sample-before img,.sample-after img{
+  position:absolute;
+  inset:0 auto auto 0;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center top;
+}
