@@ -21,3 +21,11 @@ footer{color:#83928a;padding-top:clamp(2px,.5dvh,5px)}
 #new-shoot{background:#dceee5;border-color:#bcd8c8;color:#365b4b}
 @media(max-height:650px){.workspace{gap:5px;padding-top:5px}.sample{height:clamp(80px,18dvh,118px)}.upload-zone{height:clamp(100px,24dvh,160px)}.editor{gap:6px;padding:9px}.category{height:30px}.generate{height:37px}}
 @media(min-width:650px){body{background:#eef3ef}}
+
+/* Fine adjustment: raise the editor's top edge and upload field,
+   while retaining the upload field's exact height. */
+@media(min-height:651px){
+  .workspace{gap:clamp(4px,.8dvh,10px)}
+  .editor{margin-top:-8px}
+  .upload-zone{margin-bottom:clamp(12px,1.8dvh,18px)}
+}
