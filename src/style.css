@@ -78,3 +78,9 @@ footer{position:relative;flex-shrink:0;line-height:1.3}
 .sample img{transition:opacity .35s ease}
 .sample img.demo-fading{opacity:0}
 @media(prefers-reduced-motion:reduce){.sample img{transition:none}}
+
+/* Fill the unused result canvas with a soft, blurred copy of the same image. */
+.result-image{isolation:isolate}
+.result-image img.result-backdrop{position:absolute;inset:-24px;width:calc(100% + 48px);height:calc(100% + 48px);max-width:none;max-height:none;object-fit:cover;filter:blur(22px) brightness(.87);pointer-events:none;z-index:0}
+.result-image img.result-foreground{position:relative;z-index:1;object-fit:contain}
+.result-image .preview-label{z-index:2}
