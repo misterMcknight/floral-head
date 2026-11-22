@@ -12,7 +12,7 @@ export default async function handler(req,res){
     if(!sheet.ok)throw new Error('Unable to retrieve the published Google Sheet.');
     const csv=await sheet.text();
     const rows=[];let row=[],field='',quoted=false;
-    for(let i=0;i<csv.length;i++){const ch=csv[i];if(ch==='"'){if(quoted&&csv[i+1]==='"'){field+='"';i++;}else quoted=!quoted;}else if(ch===','&&!quoted){row.push(field);field='';}else if((ch==='\\n'||ch==='\\r')&&!quoted){row.push(field);if(row.some(x=>x.trim()))rows.push(row);row=[];field='';if(ch==='\\r'&&csv[i+1]==='\\n')i++;}else field+=ch;}
+    for(let i=0;i<csv.length;i++){const ch=csv[i];if(ch==='"'){if(quoted&&csv[i+1]==='"'){field+='"';i++;}else quoted=!quoted;}else if(ch===','&&!quoted){row.push(field);field='';}else if((ch==='\n'||ch==='\r')&&!quoted){row.push(field);if(row.some(x=>x.trim()))rows.push(row);row=[];field='';if(ch==='\r'&&csv[i+1]==='\n')i++;}else field+=ch;}
     if(field||row.length){row.push(field);rows.push(row);}
     const entry=rows.find(r=>r[0]?.trim().toUpperCase()===(category==='Other'?'OTHERS':category.toUpperCase()));
     if(!entry)throw new Error('No prompt found for the selected garment type.');
