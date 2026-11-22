@@ -16,7 +16,7 @@ async function generateImage(){
  const button=document.querySelector('#generate'),status=document.querySelector('#status');
  button.disabled=true;button.textContent='Generating image…';status.textContent='Creating your fashion photograph. This may take a minute.';
  try{
-   const input=await Promise.all(images.map(({file})=>new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve({type:file.type,data:String(reader.result).split(',')[1]});reader.onerror=reject;reader.readAsDataURL(file);})));
+   const input=await Promise.all(images.map(({file})=>new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{try{const scale=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight)),canvas=document.createElement('canvas');canvas.width=Math.round(img.naturalWidth*scale);canvas.height=Math.round(img.naturalHeight*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);const data=canvas.toDataURL('image/jpeg',.82).split(',')[1];URL.revokeObjectURL(url);resolve({type:'image/jpeg',data});}catch(e){URL.revokeObjectURL(url);reject(e);}};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Could not read an uploaded image.'));};img.src=url;})));
    const response=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category,images:input})});
    const data=await response.json();
    if(!response.ok||!data.image)throw new Error(data.error||'Image generation failed.');
