@@ -1,6 +1,6 @@
 import './style.css';
 const app=document.querySelector('#app');
-let images=[],category='Kaftan',screen='home',resultUrl='',busy=false,generationError='';
+let images=[],category='Other',screen='home',resultUrl='',busy=false,generationError='';
 const types=['Kaftan','Suit','Agbada','Other'];
 const demoPairs=Array.from({length:5},(_,i)=>({before:`/floral-before-${i+1}.jpg`,after:`/floral-after-${i+1}.jpg`}));
 let demoIndex=0,demoTimer=null;
