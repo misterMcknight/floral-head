@@ -8,9 +8,7 @@ export default async function handler(req, res) {
     }).join('');
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
       <rect width="1200" height="1200" fill="#fff"/>
-      <g transform="translate(600 480) scale(.70)">${petals}</g>
-      <text x="600" y="690" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="109" letter-spacing="3" fill="#050505">FLORAL-HEAD</text>
-      <text x="600" y="775" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-style="italic" font-size="42" fill="#101010">Turn screenshots into professional fashion images.</text>
+      <g transform="translate(600 600) scale(1.65)">${petals}</g>
     </svg>`;
     const png = await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toBuffer();
     res.setHeader('Content-Type', 'image/png');
