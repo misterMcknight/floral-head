@@ -3,7 +3,7 @@ const app=document.querySelector('#app');
 const SB_URL='https://bdjbpvfurperdxyviiyl.supabase.co';
 const SB_KEY='sb_publishable_HGImemp0SdlMeliHw6KXJw_kIVou2Vh';
 const ADMIN_EMAIL='mcknightcouture@gmail.com';
-const adminPath=location.pathname.replace(/\\/$/,'')==='/admin';
+const adminPath=location.pathname.replace(/\/$/,'')==='/admin';
 function visitorId(){let id=localStorage.getItem('fh_visitor_id');if(!id){id=crypto.randomUUID();localStorage.setItem('fh_visitor_id',id);}return id;}
 async function trackEvent(event_type){try{const key='fh_visit_'+new Date().toISOString().slice(0,10);if(event_type==='visit'&&localStorage.getItem(key))return;const r=await fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event_type,visitor_id:visitorId()})});if(r.ok&&event_type==='visit')localStorage.setItem(key,'1');}catch{}}
 function adminHeaders(token){return {'apikey':SB_KEY,'Authorization':'Bearer '+token};}
