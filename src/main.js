@@ -2,7 +2,7 @@ import './style.css';
 const app=document.querySelector('#app');
 let images=[],category='Other',screen='home',resultUrl='',busy=false,generationError='';
 const types=['Kaftan','Suit','Agbada','Other'];
-const demoPairs=Array.from({length:5},(_,i)=>({before:`/floral-before-${i+1}.jpg`,after:`/floral-after-${i+1}.jpg`}));
+const demoPairs=Array.from({length:5},(_,i)=>({before:`./floral-before-${i+1}.jpg`,after:`./floral-after-${i+1}.jpg`}));
 let demoIndex=0,demoTimer=null;
 function startDemoRotation(){clearInterval(demoTimer);if(screen!=='home')return;const before=document.querySelector('.sample-before img'),after=document.querySelector('.sample-after img');if(!before||!after)return;const advance=()=>{const next=(demoIndex+1)%demoPairs.length;const pair=demoPairs[next];const b=new Image(),a=new Image();let ready=0;const done=()=>{if(++ready!==2||screen!=='home'||!before.isConnected)return;before.classList.add('demo-fading');after.classList.add('demo-fading');setTimeout(()=>{if(!before.isConnected)return;before.src=pair.before;after.src=pair.after;demoIndex=next;requestAnimationFrame(()=>{before.classList.remove('demo-fading');after.classList.remove('demo-fading');});},350);};b.onload=done;a.onload=done;b.onerror=()=>{};a.onerror=()=>{};b.src=pair.before;a.src=pair.after;};demoTimer=setInterval(advance,6000);}
 
@@ -19,7 +19,7 @@ async function generateImage(){
  resultUrl='';generationError='';screen='result';render();
  try{
    const input=await Promise.all(images.map(({file})=>new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{try{const scale=Math.min(1,2048/Math.max(img.naturalWidth,img.naturalHeight)),canvas=document.createElement('canvas');canvas.width=Math.round(img.naturalWidth*scale);canvas.height=Math.round(img.naturalHeight*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);const data=canvas.toDataURL('image/jpeg',.9).split(',')[1];URL.revokeObjectURL(url);resolve({type:'image/jpeg',data});}catch(e){URL.revokeObjectURL(url);reject(e);}};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Could not read an uploaded image.'));};img.src=url;})));
-   const response=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category,images:input})});
+   const response=await fetch((location.pathname.startsWith('/floral/')?'/floral':'')+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category,images:input})});
    const data=await response.json();
    if(!response.ok||!data.image)throw new Error(data.error||'Image generation failed.');
    resultUrl=data.image;screen='result';render();
