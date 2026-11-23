@@ -1,5 +1,20 @@
 import './style.css';
 const app=document.querySelector('#app');
+const SB_URL='https://bdjbpvfurperdxyviiyl.supabase.co';
+const SB_KEY='sb_publishable_HGImemp0SdlMeliHw6KXJw_kIVou2Vh';
+const ADMIN_EMAIL='mcknightcouture@gmail.com';
+const adminPath=location.pathname.replace(/\\/$/,'')==='/admin';
+function visitorId(){let id=localStorage.getItem('fh_visitor_id');if(!id){id=crypto.randomUUID();localStorage.setItem('fh_visitor_id',id);}return id;}
+async function trackEvent(event_type){try{const key='fh_visit_'+new Date().toISOString().slice(0,10);if(event_type==='visit'&&localStorage.getItem(key))return;const r=await fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event_type,visitor_id:visitorId()})});if(r.ok&&event_type==='visit')localStorage.setItem(key,'1');}catch{}}
+function adminHeaders(token){return {'apikey':SB_KEY,'Authorization':'Bearer '+token};}
+function adminRender(message=''){app.innerHTML=`<div class="admin-shell"><h1>FLORAL-HEAD · Admin</h1><p>Private daily analytics</p><div id="admin-content"><p>${escapeHtml(message)}</p></div><button id="admin-logout" hidden>Sign out</button><a href="/">Back to FLORAL-HEAD</a></div>`;}
+async function adminInit(){adminRender();let token=sessionStorage.getItem('fh_admin_token');const hash=new URLSearchParams(location.hash.slice(1));if(hash.get('access_token')){token=hash.get('access_token');sessionStorage.setItem('fh_admin_token',token);history.replaceState(null,'',location.pathname);}
+ if(!token){adminLogin();return;}
+ try{const u=await fetch(SB_URL+'/auth/v1/user',{headers:adminHeaders(token)});const user=await u.json();if(!u.ok||user.email?.toLowerCase()!==ADMIN_EMAIL)throw Error('Not authorized');const today=new Date().toISOString().slice(0,10);let rows=[],offset=0;while(true){const response=await fetch(SB_URL+'/rest/v1/floral_head_events?select=event_type,visitor_id,country,created_at&created_at=gte.'+today+'T00%3A00%3A00Z&order=created_at.asc&limit=1000&offset='+offset,{headers:adminHeaders(token)});if(!response.ok)throw Error('Could not load analytics');const page=await response.json();rows.push(...page);if(page.length<1000)break;offset+=1000;}
+ const visits=rows.filter(x=>x.event_type==='visit');const unique=new Set(visits.map(x=>x.visitor_id));const countries={};for(const v of visits){const c=v.country||'Unknown';(countries[c]??=new Set()).add(v.visitor_id);}adminRender();document.querySelector('#admin-content').innerHTML=`<p class="admin-date">Today · ${today} (UTC)</p><div class="admin-stats"><div><span>Unique visitors</span><strong>${unique.size}</strong></div><div><span>Images generated</span><strong>${rows.filter(x=>x.event_type==='generation').length}</strong></div></div><h2>Visitors by country</h2><div class="admin-countries">${Object.entries(countries).sort((a,b)=>b[1].size-a[1].size).map(([c,set])=>`<div><span>${escapeHtml(c)}</span><strong>${set.size}</strong></div>`).join('')||'<p>No visits recorded yet.</p>'}</div>`;const logout=document.querySelector('#admin-logout');logout.hidden=false;logout.onclick=()=>{sessionStorage.removeItem('fh_admin_token');location.reload();};
+ }catch(e){sessionStorage.removeItem('fh_admin_token');adminLogin('Please sign in with your authorized email address.');}}
+function adminLogin(message=''){document.querySelector('#admin-content').innerHTML=`<p>${escapeHtml(message)}</p><form id="admin-form"><label>Email address<input type="email" value="${ADMIN_EMAIL}" required autocomplete="email" id="admin-email"></label><button type="submit">Send login link</button></form><p id="admin-message"></p>`;document.querySelector('#admin-form').onsubmit=async e=>{e.preventDefault();const email=document.querySelector('#admin-email').value.trim().toLowerCase();const status=document.querySelector('#admin-message');if(email!==ADMIN_EMAIL){status.textContent='This email is not authorized.';return;}status.textContent='Sending sign-in link…';try{const response=await fetch(SB_URL+'/auth/v1/otp',{method:'POST',headers:{'apikey':SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,create_user:true,options:{email_redirect_to:location.origin+'/admin'}})});if(!response.ok)throw Error('Could not send the link. Check Supabase email settings.');status.textContent='Check your inbox for your sign-in link.';}catch(err){status.textContent=err.message;}};}
+
 let images=[],category='Other',screen='home',resultUrl='',busy=false,generationError='';
 const types=['Kaftan','Suit','Agbada','Other'];
 const demoPairs=Array.from({length:5},(_,i)=>({before:`./floral-before-${i+1}.jpg`,after:`./floral-after-${i+1}.jpg`}));
@@ -22,9 +37,9 @@ async function generateImage(){
    const response=await fetch((location.pathname.startsWith('/floral/')?'/floral':'')+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category,images:input})});
    const data=await response.json();
    if(!response.ok||!data.image)throw new Error(data.error||'Image generation failed.');
-   resultUrl=data.image;screen='result';render();
+   resultUrl=data.image;screen='result';render();trackEvent('generation');
  }catch(error){generationError=error.message||'Unable to generate image. Please try again.';render();}
  finally{busy=false;}
 }
 function addFiles(list){const remaining=Math.max(0,3-images.length);for(const file of [...list].slice(0,remaining)){images.push({file,url:URL.createObjectURL(file)});}render();}
-render();
+if(adminPath)adminInit();else{render();trackEvent('visit');}
