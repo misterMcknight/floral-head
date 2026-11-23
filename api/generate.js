@@ -18,7 +18,7 @@ export default async function handler(req,res){
     if(!entry)throw new Error('No prompt found for the selected garment type.');
     const prompt=(Math.random()<0.7?entry[1]:entry[2])?.trim();
     if(!prompt||prompt.length<100)throw new Error('The selected garment prompt is missing from the published Google Sheet.');
-    const form=new FormData();form.set('model','gpt-image-1.5');form.set('prompt',prompt);form.set('size','1024x1536');form.set('quality','high');form.set('output_format','jpeg');
+    const form=new FormData();form.set('model','gpt-image-2.6-sunburst');form.set('prompt',prompt);form.set('size','1024x1536');form.set('quality','high');form.set('output_format','jpeg');
     for(let i=0;i<images.length;i++){const img=images[i];if(!img||!['image/jpeg','image/png','image/webp'].includes(img.type)||typeof img.data!=='string')return res.status(400).json({error:'Invalid image format.'});const raw=Buffer.from(img.data,'base64');if(!raw.length||raw.length>10*1024*1024)return res.status(413).json({error:'Each image must be smaller than 10 MB.'});form.append('image[]',new Blob([raw],{type:img.type}),'reference-'+(i+1)+'.'+(img.type==='image/png'?'png':img.type==='image/webp'?'webp':'jpg'));}
     const response=await fetch('https://api.openai.com/v1/images/edits',{method:'POST',headers:{Authorization:'Bearer '+process.env.OPENAI_API_KEY},body:form,signal:AbortSignal.timeout(110000)});
     const data=await response.json().catch(()=>({}));
