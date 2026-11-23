@@ -106,3 +106,11 @@ footer{position:relative;flex-shrink:0;line-height:1.3}
 @keyframes cloud-drift-c{to{transform:translate(12%,-22%) scale(1.15)}}
 @keyframes caption-breathe{0%,100%{opacity:.5}50%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.cloud-orbit,.cloud-blob,.cloud-core,.loading-caption{animation:none}}
+
+/* Dotted image-generation animation, inspired by the ChatGPT progress field. */
+.generation-loading{background:#fafbfc;gap:16px}
+.dot-field{width:min(90%,330px);height:min(69%,520px);display:grid;grid-template-columns:repeat(19,minmax(0,1fr));grid-template-rows:repeat(26,minmax(0,1fr));align-items:center;justify-items:center;overflow:hidden;mask-image:linear-gradient(to bottom,transparent 0%,black 12%,black 86%,transparent 100%)}
+.dot-field i{display:block;width:4px;height:4px;border-radius:50%;background:#466af1;opacity:.18;transform:scale(.65);animation:dot-wave 4.8s ease-in-out infinite;animation-delay:calc(var(--delay) * -1)}
+@keyframes dot-wave{0%,100%{opacity:.14;transform:scale(.55)}35%{opacity:.9;transform:scale(1.65)}65%{opacity:.35;transform:scale(.85)}}
+.generation-loading .loading-caption{order:-1;animation:none;color:#6b8278}
+@media(prefers-reduced-motion:reduce){.dot-field i{animation:none;opacity:.45;transform:none}}
